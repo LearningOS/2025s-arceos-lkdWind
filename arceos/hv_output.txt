@@ -65,10 +65,10 @@ smp = 1
 build_mode = release
 log_level = warn
 
-[37m[  0.801040 0 fatfs::dir:139] [31mIs a directory[m
-[m[37m[  0.848071 0 fatfs::dir:139] [31mIs a directory[m
-[m[37m[  0.889583 0 fatfs::dir:139] [31mIs a directory[m
-[m[37m[  0.929474 0 fatfs::dir:139] [31mIs a directory[m
+[37m[  1.655375 0 fatfs::dir:139] [31mIs a directory[m
+[m[37m[  1.703382 0 fatfs::dir:139] [31mIs a directory[m
+[m[37m[  1.764245 0 fatfs::dir:139] [31mIs a directory[m
+[m[37m[  1.811746 0 fatfs::dir:139] [31mIs a directory[m
 [mHypervisor ...
 app: /sbin/skernel2
 paddr: PA:0x80642000
