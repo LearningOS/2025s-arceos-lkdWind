@@ -65,6 +65,7 @@ jobs:
           chmod -R +x scripts/
           
           ./scripts/total-test.sh > tmp.txt
+          cat tmp.txt
           score=$(cat tmp.txt | tail -n1)
           echo $score
 
