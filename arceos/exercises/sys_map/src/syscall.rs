@@ -1,10 +1,11 @@
 #![allow(dead_code)]
 
+use core::alloc::Layout;
 use core::ffi::{c_void, c_char, c_int};
 use axhal::arch::TrapFrame;
 use axhal::trap::{register_trap_handler, SYSCALL};
 use axerrno::LinuxError;
-use axtask::current;
+use axtask::{current, TaskExtMut};
 use axtask::TaskExtRef;
 use axhal::paging::MappingFlags;
 use arceos_posix_api as api;
@@ -131,6 +132,11 @@ fn handle_syscall(tf: &TrapFrame, syscall_num: usize) -> isize {
     ret
 }
 
+use axmm::AddrSpace;
+use axalloc::global_allocator;
+use bitflags::Flag;
+use memory_addr::{pa, MemoryAddr, VirtAddr, PAGE_SIZE_4K};
+use axhal::mem::phys_to_virt;
 #[allow(unused_variables)]
 fn sys_mmap(
     addr: *mut usize,
@@ -140,7 +146,23 @@ fn sys_mmap(
     fd: i32,
     _offset: isize,
 ) -> isize {
-    unimplemented!("no sys_mmap!");
+    if length <= 0 {
+        return -1;
+    }
+    
+    let flags = MappingFlags::from_bits_truncate(prot as usize);
+    let entry: VirtAddr = (MmapFlags::MAP_STACK.bits() as usize ).into();
+    let current_task = current();
+    let space = current_task.task_ext().aspace.clone();
+    let mut space = space.lock();
+    space.map_alloc(entry, PAGE_SIZE_4K, flags|MappingFlags::READ|MappingFlags::WRITE|MappingFlags::EXECUTE|MappingFlags::USER, true).expect("map error");
+    let (paddr,_, _) = space
+        .page_table()
+        .query(entry)
+        .unwrap();
+
+    api::sys_read(fd, entry.as_usize() as *mut c_void, PAGE_SIZE_4K);
+    entry.as_usize() as isize
 }
 
 fn sys_openat(dfd: c_int, fname: *const c_char, flags: c_int, mode: api::ctypes::mode_t) -> isize {

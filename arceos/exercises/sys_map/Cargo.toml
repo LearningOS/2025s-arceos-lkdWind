@@ -17,3 +17,4 @@ kernel-elf-parser = "0.1.0"
 arceos_posix_api = { workspace = true }
 bitflags = "2.6"
 memory_addr = "0.3"
+axalloc = { workspace = true }

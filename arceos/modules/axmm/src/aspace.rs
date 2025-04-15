@@ -41,6 +41,10 @@ impl AddrSpace {
     pub const fn page_table(&self) -> &PageTable {
         &self.pt
     }
+    /// mut
+    pub fn page_table_mut(&mut self) -> &mut PageTable {
+        &mut self.pt
+    }
 
     /// Returns the root physical address of the inner page table.
     pub const fn page_table_root(&self) -> PhysAddr {
