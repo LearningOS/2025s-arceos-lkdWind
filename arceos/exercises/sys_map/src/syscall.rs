@@ -149,21 +149,23 @@ fn sys_mmap(
     if length <= 0 {
         return -1;
     }
+    let map_type = MmapFlags::from_bits_truncate(flags);
+    if map_type.contains(MmapFlags::MAP_PRIVATE) {
+        let flags = MappingFlags::from_bits_truncate(prot as usize);
+        let entry: VirtAddr = ( MmapFlags::MAP_STACK.bits() as usize ).into();
+        let current_task = current();
+        let space = current_task.task_ext().aspace.clone();
+        let mut space = space.lock();
+        axlog::ax_println!("{:?}",flags);
+        space.map_alloc(entry, length.align_up_4k(), flags|MappingFlags::WRITE|MappingFlags::USER, true).expect("map error");
+        let (paddr,_, _) = space
+            .page_table()
+            .query(entry)
+            .unwrap();
     
-    let flags = MappingFlags::from_bits_truncate(prot as usize);
-    let entry: VirtAddr = ( MmapFlags::MAP_STACK.bits() as usize ).into();
-    let current_task = current();
-    let space = current_task.task_ext().aspace.clone();
-    let mut space = space.lock();
-    axlog::ax_println!("{:?}",flags);
-    space.map_alloc(entry, length.align_up_4k(), flags|MappingFlags::WRITE|MappingFlags::USER, true).expect("map error");
-    let (paddr,_, _) = space
-        .page_table()
-        .query(entry)
-        .unwrap();
-
-    api::sys_read(fd, entry.as_usize() as *mut c_void, length);
-    entry.as_usize() as isize
+        api::sys_read(fd, entry.as_usize() as *mut c_void, length);
+        entry.as_usize() as isize
+    }
 }
 
 fn sys_openat(dfd: c_int, fname: *const c_char, flags: c_int, mode: api::ctypes::mode_t) -> isize {
