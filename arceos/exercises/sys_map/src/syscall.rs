@@ -164,8 +164,9 @@ fn sys_mmap(
             .unwrap();
     
         api::sys_read(fd, entry.as_usize() as *mut c_void, length);
-        entry.as_usize() as isize
+        return entry.as_usize() as isize
     }
+    0
 }
 
 fn sys_openat(dfd: c_int, fname: *const c_char, flags: c_int, mode: api::ctypes::mode_t) -> isize {
