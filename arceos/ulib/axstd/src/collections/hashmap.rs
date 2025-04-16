@@ -3,7 +3,6 @@ use core::hash::{Hash, Hasher};
 extern crate alloc;
 use alloc::vec::Vec;
 use axhal::misc::random;
-use core::iter;
 use core::slice;
 
 pub struct HashMap<K, V> {
