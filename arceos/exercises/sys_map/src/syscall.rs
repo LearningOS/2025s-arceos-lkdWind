@@ -151,17 +151,18 @@ fn sys_mmap(
     }
     
     let flags = MappingFlags::from_bits_truncate(prot as usize);
-    let entry: VirtAddr = ( 0x20000 as usize ).into();
+    let entry: VirtAddr = ( MmapFlags::MAP_STACK.bits() as usize ).into();
     let current_task = current();
     let space = current_task.task_ext().aspace.clone();
     let mut space = space.lock();
-    space.map_alloc(entry, PAGE_SIZE_4K, flags|MappingFlags::READ|MappingFlags::WRITE|MappingFlags::USER, true).expect("map error");
+    axlog::ax_println!("{:?}",flags);
+    space.map_alloc(entry, length.align_up_4k(), flags|MappingFlags::WRITE|MappingFlags::USER, true).expect("map error");
     let (paddr,_, _) = space
         .page_table()
         .query(entry)
         .unwrap();
 
-    api::sys_read(fd, entry.as_usize() as *mut c_void, PAGE_SIZE_4K);
+    api::sys_read(fd, entry.as_usize() as *mut c_void, length);
     entry.as_usize() as isize
 }
 
